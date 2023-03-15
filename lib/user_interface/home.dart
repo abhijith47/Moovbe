@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:moovbe/Utils/utils.dart';
 import 'package:moovbe/models/busModel.dart';
 
 import '../Utils/Globals.dart';
@@ -18,12 +19,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Bus> buses = [];
+  Timer? timer;
 
   @override
   void initState() {
     super.initState();
     getBusList();
-    _fetchBusList();
+    _refreshToken();
   }
 
   getBusList() async {
@@ -40,7 +42,7 @@ class _HomePageState extends State<HomePage> {
     for (int i = 0; i < total_buses; i++) {
       String busId = random.nextInt(9999).toString() + i.toString();
       String driverId = i.toString() + random.nextInt(9999).toString();
-      int seatCount = 30 + random.nextInt(20); // seat count between 20 and 50
+      int seatCount = random.nextInt(2) == 0 ? 36 : 40;
       int layout = random.nextInt(2) == 0 ? 13 : 22;
       String driverlicense =
           i.toString() + driverId + random.nextInt(9999).toString();
@@ -61,7 +63,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _fetchBusList() async {
+  getToken() async {
     final url1 =
         Uri.parse('http://flutter.noviindus.co.in/api/api/token/refresh/');
     final token_response =
@@ -81,95 +83,89 @@ class _HomePageState extends State<HomePage> {
       debugPrint(token_response.body);
       // Login failed, display an error message
     }
-
-    // final url = Uri.parse(
-    //     'http://flutter.noviindus.co.in/api/BusListApi/${Globals.url_id}/');
-    // var response = await http.get(
-    //   url,
-    //   headers: {"Authorization": "Bearer ${Globals.access}"},
-    // );
-    // final url = Uri.parse(
-    //     'http://flutter.noviindus.co.in/api/BusListApi/${Globals.access}/');
-    // // final url = Uri.parse(
-    // //     'http://flutter.noviindus.co.in/api/DriverApi//${Globals.url_id}/');
-    // final response = await http.post(url, body: {
-    //   // 'username': _usernameController.text,
-    //   // 'password': _passwordController.text,
-    //   'bus_id': '1',
-    //   'driver_id': '1',
-    //   'name': 'ksrtc swift'
-    // });
-    // print(url.toString());
-    // if (response.statusCode == 200) {
-    //   print(response.body);
-
-    //   var data = jsonDecode(response.body);
-    //   print(data.toString());
-    //   print(data.toString());
-    // } else {
-    //   print(response.body);
-    //   setState(() {
-    //     _isLoading = false;
-    //   });
-    //   // TODO: Display an error message to the user
-    // }
-    // print(_busList);
-    // print(_busList.length);
   }
 
-  Widget homecontainer(color, title, subtitle, image) {
-    return Container(
-      decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-          color: color),
-      height: 200,
-      width: 175,
-      child: Stack(
-        children: [
-          Positioned(
-            top: 15,
-            left: 15,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.white),
-                ),
-              ],
+  Future<void> _refreshToken() async {
+    if (timer == null) {
+      getToken();
+      timer = Timer.periodic(const Duration(minutes: 2), (timer) async {
+        if (await Utils.connectivityCheck()) {
+          getToken();
+        }
+      });
+    } else {
+      timer!.cancel();
+      timer = null;
+      _refreshToken();
+    }
+  }
+
+  Widget homecontainer(color, title, subtitle, image, widgetType) {
+    return InkWell(
+      onTap: () {
+        if (widgetType.toString() == 'BUS') {
+        } else {
+          Navigator.pushNamed(
+            context,
+            '/driver_list',
+          );
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
+            color: color),
+        height: 200,
+        width: 175,
+        child: Stack(
+          children: [
+            Positioned(
+              top: 15,
+              left: 15,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.white),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Image.asset(
-              image,
-              width: 150,
-              fit: BoxFit.scaleDown,
-              height: 140,
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Image.asset(
+                image,
+                width: 150,
+                fit: BoxFit.scaleDown,
+                height: 140,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    Globals.statusbarHeight = MediaQuery.of(context).viewPadding.top;
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: const Color.fromRGBO(43, 43, 43, 1),
         centerTitle: true,
         toolbarHeight: 90,
         title: Image.asset(
@@ -189,26 +185,32 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    homecontainer(Colors.red, 'Bus', 'Manage your Bus',
-                        'assets/images/yellow_bus.png'),
-                    homecontainer(Colors.black, 'Driver', 'Manage you Driver',
-                        'assets/images/driver.png')
+                    homecontainer(
+                        const Color.fromRGBO(252, 21, 59, 1),
+                        'Bus',
+                        'Manage your Bus',
+                        'assets/images/yellow_bus.png',
+                        'BUS'),
+                    homecontainer(
+                        const Color.fromRGBO(43, 43, 43, 1),
+                        'Driver',
+                        'Manage you Driver',
+                        'assets/images/driver.png',
+                        'DRIVER')
                   ],
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 10, left: 20, right: 20),
-                child: Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(buses.length.toString() + ' buses found',
-                          style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black54)),
-                    ],
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(buses.length.toString() + ' buses found',
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54)),
+                  ],
                 ),
               ),
               Expanded(
@@ -276,9 +278,9 @@ class _HomePageState extends State<HomePage> {
                                   },
                                   child: Container(
                                       width: 80,
-                                      height: 30,
+                                      height: 33,
                                       decoration: const BoxDecoration(
-                                        color: Colors.red,
+                                        color: Color.fromRGBO(252, 21, 59, 1),
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(10)),
                                       ),

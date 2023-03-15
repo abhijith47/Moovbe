@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:moovbe/Utils/Globals.dart';
 import 'package:moovbe/models/busModel.dart';
 
 class BusDetails extends StatefulWidget {
@@ -10,29 +13,68 @@ class BusDetails extends StatefulWidget {
 
 class _BusDetailsState extends State<BusDetails> {
   late Bus singlebus;
-
   List<Widget> finalSeats = [];
-  sideSeatedBus(Bus bus) {
-    var seats = 36;
 
-    for (int i = 0; i <= seats; i++) {
-      if (i >= 3) {
-        if ((i + 1) % 4 == 0) {
-          finalSeats.add(
-            Container(
-              width: 30,
-            ),
-          );
-        } else {
-          finalSeats.add(BusSeat());
-        }
+  sideSeatedBus(Bus bus) {
+    for (int j = 0; j < 4; j++) {
+      finalSeats.add(
+        Container(
+          width: 30,
+        ),
+      );
+    }
+    finalSeats.add(SizedBox(
+        height: 30,
+        width: 30,
+        child: SvgPicture.asset(
+          'assets/images/seat_black.svg',
+          fit: BoxFit.scaleDown,
+        )));
+    var seats = bus.seatCount;
+    debugPrint(seats.toString());
+    for (int i = 1; i <= seats; i++) {
+      if (i == 3 || (i > 5 && (i - 3) % 5 == 0)) {
+        seats = seats + 1;
+        finalSeats.add(
+          Container(
+            width: 30,
+          ),
+        );
       } else {
         finalSeats.add(BusSeat());
       }
     }
-    finalSeats.removeAt(0);
-    //finalSeats.removeAt(1);
-    print(finalSeats);
+  }
+
+  normalSeatedBus(Bus bus) {
+    for (int j = 0; j < 4; j++) {
+      finalSeats.add(
+        Container(
+          width: 30,
+        ),
+      );
+    }
+    finalSeats.add(SizedBox(
+        height: 30,
+        width: 30,
+        child: SvgPicture.asset(
+          'assets/images/seat_black.svg',
+          fit: BoxFit.scaleDown,
+        )));
+    var seats = bus.seatCount;
+    debugPrint(seats.toString());
+    for (int i = 1; i <= seats; i++) {
+      if (i == 2 || (i > 2 && (i - 2) % 5 == 0)) {
+        seats = seats + 1;
+        finalSeats.add(
+          Container(
+            width: 30,
+          ),
+        );
+      } else {
+        finalSeats.add(BusSeat());
+      }
+    }
   }
 
   Widget driverContainer(color, title, subtitle, image) {
@@ -101,47 +143,67 @@ class _BusDetailsState extends State<BusDetails> {
     if (instance) {
       instance = false;
       singlebus = argument['bus_data'];
-      sideSeatedBus(singlebus);
+
       if (singlebus.layout == 13) {
+        sideSeatedBus(singlebus);
       } else {
-        // normalSeated();
+        normalSeatedBus(singlebus);
       }
     }
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Color.fromRGBO(43, 43, 43, 1),
         centerTitle: true,
         toolbarHeight: 90,
-        title: const Text(
-          'ksrtc swift scania',
+        title: Text(
+          singlebus.busBrand.toString() + ' ' + singlebus.busDescription,
           style: TextStyle(
               fontSize: 18, fontWeight: FontWeight.normal, color: Colors.white),
         ),
       ),
-      body: Container(
-        height: MediaQuery.of(context).size.height - 90,
-        width: MediaQuery.of(context).size.width,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            driverContainer(Colors.black, singlebus.drivername,
-                singlebus.driverlicense, 'assets/images/driver.png'),
-            Container(
-              height: 500,
-              width: 300,
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5,
-                  childAspectRatio: 1,
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height:
+              MediaQuery.of(context).size.height - Globals.statusbarHeight - 90,
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              driverContainer(
+                  const Color.fromRGBO(43, 43, 43, 1),
+                  singlebus.drivername,
+                  singlebus.driverlicense,
+                  'assets/images/driver.png'),
+              Expanded(
+                //   height: MediaQuery.of(context).size.height * .9,
+                // width: 300,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      left: 30, right: 30, bottom: 20, top: 20),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    ),
+                    child: GridView.builder(
+                      scrollDirection: Axis.vertical,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 5,
+                        childAspectRatio: 1.5,
+                      ),
+                      itemCount: finalSeats.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return finalSeats[index];
+                      },
+                    ),
+                  ),
                 ),
-                itemCount: finalSeats.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return finalSeats[index];
-                },
-              ),
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -151,38 +213,12 @@ class _BusDetailsState extends State<BusDetails> {
 class BusSeat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 20,
-      width: 20,
-      decoration: BoxDecoration(
-        color: Colors.grey,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.grey[300]!,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            '3',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 8),
-          Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.grey,
-            ),
-          ),
-        ],
-      ),
-    );
+    return SizedBox(
+        height: 30,
+        width: 30,
+        child: SvgPicture.asset(
+          'assets/images/seat_red.svg',
+          fit: BoxFit.scaleDown,
+        ));
   }
 }
