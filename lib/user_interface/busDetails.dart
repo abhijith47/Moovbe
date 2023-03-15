@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:moovbe/Utils/Globals.dart';
 import 'package:moovbe/models/busModel.dart';
@@ -16,6 +15,7 @@ class _BusDetailsState extends State<BusDetails> {
   List<Widget> finalSeats = [];
 
   sideSeatedBus(Bus bus) {
+    //bus with only 1 seat at left side
     for (int j = 0; j < 4; j++) {
       finalSeats.add(
         Container(
@@ -47,6 +47,7 @@ class _BusDetailsState extends State<BusDetails> {
   }
 
   normalSeatedBus(Bus bus) {
+    //bus with only 2 seats on either side
     for (int j = 0; j < 4; j++) {
       finalSeats.add(
         Container(

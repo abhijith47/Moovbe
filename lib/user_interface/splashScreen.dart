@@ -1,10 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart' as http;
-import 'package:moovbe/Utils/Globals.dart';
-import 'package:moovbe/Utils/utils.dart';
 
 class splashPage extends StatefulWidget {
   static const routeName = '/splash';

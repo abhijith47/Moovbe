@@ -20,15 +20,13 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login() async {
     if (await Utils.connectivityCheck()) {
-      // Clear any previous error message
-
       // Call the Login API with the provided username and password
       final url = Uri.parse('http://flutter.noviindus.co.in/api/LoginApi');
       final response = await http.post(url, body: {
-        // 'username': _usernameController.text.trim(),
-        // 'password': _passwordController.text.trim(),
-        'username': 'admin_user',
-        'password': '123admin789',
+        'username': _usernameController.text.trim(),
+        'password': _passwordController.text.trim(),
+        // 'username': 'admin_user',
+        // 'password': '123admin789',
       });
 
       if (response.statusCode == 200) {

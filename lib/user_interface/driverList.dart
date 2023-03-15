@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:moovbe/Utils/Globals.dart';
@@ -7,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:moovbe/models/driverModel.dart';
 import 'package:moovbe/providers/driverProvider.dart';
 import 'package:provider/provider.dart';
-
 import '../Utils/utils.dart';
 
 class DriverListScreen extends StatefulWidget {
@@ -35,11 +33,7 @@ class _DriverListScreenState extends State<DriverListScreen> {
         headers: {"Authorization": "Bearer ${Globals.access}"},
       );
       if (response.statusCode == 200) {
-        debugPrint(response.body);
-
         var data = jsonDecode(response.body);
-        debugPrint(data.toString());
-        debugPrint(data['driver_list'].toString());
         if (data['driver_list'].length > 0) {
           driverProvider.driverList.clear();
           for (var i = 0; i < data['driver_list'].length; i++) {
@@ -52,9 +46,7 @@ class _DriverListScreenState extends State<DriverListScreen> {
           }
         }
       } else {
-        debugPrint(response.body);
         setState(() {});
-        // TODO: Display an error message to the user
       }
     } else {
       Fluttertoast.showToast(
@@ -79,7 +71,6 @@ class _DriverListScreenState extends State<DriverListScreen> {
       headers: {"Authorization": "Bearer ${Globals.access}"},
     );
     if (token_response.statusCode == 200) {
-      debugPrint(token_response.body);
       driverProvider.removeItem(id);
       Fluttertoast.showToast(
           msg: "driver removed",
@@ -89,7 +80,6 @@ class _DriverListScreenState extends State<DriverListScreen> {
           textColor: Colors.white,
           fontSize: 16.0);
     } else {
-      debugPrint(token_response.body);
       setState(() {});
     }
   }

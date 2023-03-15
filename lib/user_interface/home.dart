@@ -5,9 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:moovbe/Utils/utils.dart';
 import 'package:moovbe/models/busModel.dart';
-
 import '../Utils/Globals.dart';
-import 'busDetails.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = '/home';
@@ -29,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   getBusList() async {
+    //creating a dummy bus list
     Random random = Random();
     int total_buses = 5;
     List<String> names = ['Alice', 'Bob', 'Charlie', 'David', 'Emma'];
@@ -64,28 +63,23 @@ class _HomePageState extends State<HomePage> {
   }
 
   getToken() async {
+    //getting access token
     final url1 =
         Uri.parse('http://flutter.noviindus.co.in/api/api/token/refresh/');
     final token_response =
         await http.post(url1, body: {'refresh': Globals.tempToken});
     if (token_response.statusCode == 200) {
-      debugPrint('success');
-      debugPrint(token_response.body);
       final responseData = jsonDecode(token_response.body);
       final token = responseData['refresh'];
-      debugPrint(token);
+
       Globals.tempToken = token.toString();
       Globals.access = responseData['access'];
       // Successful login, navigate to the next screen
-
-    } else {
-      debugPrint('failed');
-      debugPrint(token_response.body);
-      // Login failed, display an error message
-    }
+    } else {}
   }
 
   Future<void> _refreshToken() async {
+    //updates token every 2 minutes
     if (timer == null) {
       getToken();
       timer = Timer.periodic(const Duration(minutes: 2), (timer) async {

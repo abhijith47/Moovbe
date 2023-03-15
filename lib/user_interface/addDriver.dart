@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:moovbe/Utils/Globals.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import '../Utils/utils.dart';
 
 class addDriver extends StatefulWidget {
@@ -30,7 +29,6 @@ class _addDriverState extends State<addDriver> {
   saveDriver() async {
     final url = Uri.parse(
         'http://flutter.noviindus.co.in/api/DriverApi/${Globals.url_id}/');
-
     final token_response = await http.post(
       url,
       body: {
@@ -41,8 +39,6 @@ class _addDriverState extends State<addDriver> {
       headers: {"Authorization": "Bearer ${Globals.access}"},
     );
     if (token_response.statusCode == 200) {
-      debugPrint(token_response.body);
-
       Fluttertoast.showToast(
           msg: "success",
           toastLength: Toast.LENGTH_SHORT,
@@ -52,7 +48,6 @@ class _addDriverState extends State<addDriver> {
           fontSize: 16.0);
       Navigator.pop(context);
     } else {
-      debugPrint(token_response.body);
       Fluttertoast.showToast(
           msg: "Try again",
           toastLength: Toast.LENGTH_SHORT,
@@ -61,7 +56,6 @@ class _addDriverState extends State<addDriver> {
           textColor: Colors.white,
           fontSize: 16.0);
       setState(() {});
-      // TODO: Display an error message to the user
     }
   }
 
